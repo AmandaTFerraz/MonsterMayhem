@@ -92,7 +92,54 @@ class Game {
         this.checkForElimination(); // Check if any player is eliminated
     }
 
-    
+    // Check if the cell is on the player's edge
+    isPlayerEdge(row, col, player) {
+        if (player === "player1" && row === 0) return true; // Player 1's edge is row 0
+        if (player === "player2" && row === this.gridSize - 1) return true; // Player 2's edge is the last row
+        return false;
+    }
+
+    // Get the monster type from the player
+    getMonsterTypeFromPlayer() {
+        const monsterType = prompt("Enter monster type (V for Vampire, W for Werewolf, G for Ghost):");
+        if (["V", "W", "G"].includes(monsterType)) {
+            return monsterType; // Return valid monster type
+        } else {
+            alert("Invalid monster type"); // Show error for invalid input
+            return null;
+        }
+    }
+
+     // Place the monster on the grid
+     placeMonster(row, col, player, monsterType) {
+        const monster = { type: monsterType, row, col, player, hasMoved: false };
+        this.grid[row][col] = monster; // Place monster in grid
+        this.monsters[player].push(monster); // Add monster to player's list
+        this.renderMonster(monster); // Render monster on the grid
+    }
+
+    // Move the monster to a new position
+    moveMonster(row, col, player) {
+        const monster = this.grid[row][col];
+        if (monster && monster.player === player && !monster.hasMoved) {
+            const newRow = prompt("Enter new row:");
+            const newCol = prompt("Enter new column:");
+            if (this.isValidMove(row, col, newRow, newCol, player)) {
+                this.grid[row][col] = null; // Clear old position
+                monster.row = parseInt(newRow);
+                monster.col = parseInt(newCol);
+                monster.hasMoved = true; // Mark monster as moved
+                this.grid[newRow][newCol] = monster; // Place monster in new position
+                this.checkForConflicts(); // Check for conflicts after move
+                this.renderGrid(); // Re-render the grid
+            } else {
+                alert("Invalid move"); // Show error for invalid move
+            }
+        }
+    }
+
+
+
 
 
 
