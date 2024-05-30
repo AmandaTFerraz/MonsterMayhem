@@ -65,5 +65,34 @@ class Game {
         }
     }
 
+    // Display player information
+    displayPlayerInfo() {
+        const playerInfo = document.getElementById('player-info');
+        playerInfo.innerHTML = `
+            Player 1 Monsters: ${this.monsters.player1.length}<br>
+            Player 2 Monsters: ${this.monsters.player2.length}<br>
+            Current Turn: ${this.players[this.currentTurnIndex]}
+        `; // Show number of monsters and current turn
+    }
+
+    // Handle cell click event
+    handleCellClick(row, col) {
+        if (this.turnEnded) return; // Do nothing if turn has ended
+        const currentPlayer = this.players[this.currentTurnIndex];
+        if (this.isPlayerEdge(row, col, currentPlayer) && this.grid[row][col] === null) {
+            const monsterType = this.getMonsterTypeFromPlayer();
+            if (monsterType) {
+                this.placeMonster(row, col, currentPlayer, monsterType); // Place monster if valid
+            }
+        } else if (this.grid[row][col] && this.grid[row][col].player === currentPlayer) {
+            this.moveMonster(row, col, currentPlayer); // Move monster if it's the current player's monster
+        }
+        this.checkForConflicts(); // Check for any conflicts after action
+        this.displayPlayerInfo(); // Update player info display
+        this.checkForElimination(); // Check if any player is eliminated
+    }
+
     
+
+
 
