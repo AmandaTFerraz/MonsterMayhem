@@ -1,11 +1,12 @@
 // Initialize the current game to null and set game count to 0
-let currentGame = null;
-let gameCount = 0;
+let currentGame = null; // Track the current game instance
+let gameCount = 0; // Count of games played
+
 
 // Define player statistics for wins and losses
 let playerStats = {
-    player1: { wins: 0, losses: 0 },
-    player2: { wins: 0, losses: 0 }
+    player1: { wins: 0, losses: 0 }, // Player 1 stats
+    player2: { wins: 0, losses: 0 } // Player 2 stats
 };
 
 // Function to start a new game
@@ -70,11 +71,12 @@ class Game {
     // Display player information
     displayPlayerInfo() {
         const playerInfo = document.getElementById('player-info');
+        // Show number of monsters and current turn
         playerInfo.innerHTML = `
             Player 1 Monsters: ${this.monsters.player1.length}<br>
             Player 2 Monsters: ${this.monsters.player2.length}<br>
             Current Turn: ${this.players[this.currentTurnIndex]}
-        `; // Show number of monsters and current turn
+        `; 
     }
 
     // Handle cell click event
@@ -257,7 +259,6 @@ class Game {
         this.displayPlayerInfo();
     }
 
-    // Other methods for managing game state, handling UI interactions, etc.
 }
 
 // Function to update game statistics in the UI
