@@ -1,12 +1,29 @@
-/* styles.css */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
 }
 
 #game-container {
+    position: relative;
     display: inline-block;
     margin-top: 20px;
+}
+
+#row-labels,
+#column-labels {
+    position: absolute;
+}
+
+#row-labels {
+    left: -70px;
+    top: 0;
+    width: 50px; /* Adjust width as needed */
+}
+
+#column-labels {
+    top: -70px;
+    left: 0;
+    height: 50px; /* Adjust height as needed */
 }
 
 #game-grid {
@@ -14,6 +31,7 @@ body {
     grid-template-columns: repeat(10, 50px);
     grid-template-rows: repeat(10, 50px);
     gap: 2px;
+    margin-top: 50px; /* Adjust margin to make space for labels */
 }
 
 #game-grid div {
