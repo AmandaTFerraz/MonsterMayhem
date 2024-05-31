@@ -8,7 +8,6 @@ let playerStats = {
     player2: { wins: 0, losses: 0 }
 };
 
-
 // Function to start a new game
 function startNewGame() {
     currentGame = new Game(); // Create a new Game instance
@@ -16,6 +15,7 @@ function startNewGame() {
     gameCount++; // Increment the game count
     updateGameStats(); // Update the displayed game statistics
 }
+
 // Function to end the current game
 function endCurrentGame() {
     if (currentGame) {
@@ -41,8 +41,8 @@ class Game {
         this.turnEnded = false; // Flag to indicate if the turn has ended
     }
 
-     // Initialize the game
-     init() {
+    // Initialize the game
+    init() {
         this.createGrid(); // Create the game grid
         this.displayPlayerInfo(); // Display player information
     }
@@ -87,7 +87,6 @@ class Game {
         } else if (this.grid[row][col] && this.grid[row][col].player === currentPlayer) {
             this.moveMonster(row, col, currentPlayer); // Move monster if it's the current player's monster
         }
-        this.checkForConflicts(); // Check for any conflicts after action
         this.displayPlayerInfo(); // Update player info display
         this.checkForElimination(); // Check if any player is eliminated
     }
@@ -110,12 +109,13 @@ class Game {
         }
     }
 
-     // Place the monster on the grid
-     placeMonster(row, col, player, monsterType) {
+    // Place the monster on the grid
+    placeMonster(row, col, player, monsterType) {
         const monster = { type: monsterType, row, col, player, hasMoved: false };
         this.grid[row][col] = monster; // Place monster in grid
         this.monsters[player].push(monster); // Add monster to player's list
         this.renderMonster(monster); // Render monster on the grid
+        this.checkForConflicts(); // Check for any conflicts after action
     }
 
     // Move the monster to a new position
@@ -130,8 +130,8 @@ class Game {
                 monster.col = parseInt(newCol);
                 monster.hasMoved = true; // Mark monster as moved
                 this.grid[newRow][newCol] = monster; // Place monster in new position
-                this.checkForConflicts(); // Check for conflicts after move
                 this.renderGrid(); // Re-render the grid
+                this.checkForConflicts(); // Check for conflicts after move
             } else {
                 alert("Invalid move"); // Show error for invalid move
             }
@@ -163,8 +163,8 @@ class Game {
         return true; // Path is clear
     }
 
-     // Render a monster on the grid
-     renderMonster(monster) {
+    // Render a monster on the grid
+    renderMonster(monster) {
         const cell = document.querySelector(`[data-row='${monster.row}'][data-col='${monster.col}']`);
         cell.innerText = monster.type; // Show monster type
         cell.style.color = monster.player === "player1" ? "red" : "blue"; // Color based on player
@@ -191,8 +191,8 @@ class Game {
         }
     }
 
-     // Reset the move status of all monsters
-     resetMonsterMoves() {
+    // Reset the move status of all monsters
+    resetMonsterMoves() {
         this.players.forEach(player => {
             this.monsters[player].forEach(monster => {
                 monster.hasMoved = false; // Allow monsters to move again
@@ -227,14 +227,16 @@ class Game {
     }
 
     checkForConflicts() {
-        for (let i = 0; i < this.gridSize; i++) {
-            for (let j = 0; j < this.gridSize; j++) {
-                const monsters = this.getMonstersAtPosition(i, j);
-                if (monsters.length > 1) {
-                    this.resolveConflict(monsters);
+        setTimeout(() => {
+            for (let i = 0; i < this.gridSize; i++) {
+                for (let j = 0; j < this.gridSize; j++) {
+                    const monsters = this.getMonstersAtPosition(i, j);
+                    if (monsters.length > 1) {
+                        this.resolveConflict(monsters);
+                    }
                 }
             }
-        }
+        }, 0); // Simulate asynchronous conflict checking
     }
 
     getMonstersAtPosition(row, col) {
@@ -289,14 +291,16 @@ class Game {
     }
 
     endGame(winningPlayer) {
-        if (!winningPlayer) {
-            winningPlayer = this.players.find(p => p !== this.players[this.currentTurnIndex]);
-        }
-        alert(`${winningPlayer} wins!`);
-        playerStats[winningPlayer].wins++;
-        playerStats[this.players.find(p => p !== winningPlayer)].losses++;
-        updateGameStats();
-        currentGame = null; // Reset current game
+        setTimeout(() => {
+            if (!winningPlayer) {
+                winningPlayer = this.players.find(p => p !== this.players[this.currentTurnIndex]);
+            }
+            alert(`${winningPlayer} wins!`);
+            playerStats[winningPlayer].wins++;
+            playerStats[this.players.find(p => p !== winningPlayer)].losses++;
+            updateGameStats();
+            currentGame = null; // Reset current game
+        }, 0); // Simulate asynchronous game end
     }
 }
 
@@ -310,12 +314,3 @@ function updateGameStats() {
 }
 
 updateGameStats();
-
-
-
-
-
-
-
-
-
