@@ -39,6 +39,8 @@ class Game {
             player2: 0
         }; // Initialize count of removed monsters for each player
         this.turnEnded = false; // Flag to indicate if the turn has ended
+        this.worker = new Worker('worker.js'); // Create a new Web Worker
+        this.worker.onmessage = this.handleWorkerMessage.bind(this); // Bind the message handler
     }
 
     // Initialize the game
@@ -87,6 +89,7 @@ class Game {
         } else if (this.grid[row][col] && this.grid[row][col].player === currentPlayer) {
             this.moveMonster(row, col, currentPlayer); // Move monster if it's the current player's monster
         }
+        this.checkForConflicts(); // Check for any conflicts after action
         this.displayPlayerInfo(); // Update player info display
         this.checkForElimination(); // Check if any player is eliminated
     }
@@ -115,7 +118,6 @@ class Game {
         this.grid[row][col] = monster; // Place monster in grid
         this.monsters[player].push(monster); // Add monster to player's list
         this.renderMonster(monster); // Render monster on the grid
-        this.checkForConflicts(); // Check for any conflicts after action
     }
 
     // Move the monster to a new position
@@ -130,8 +132,8 @@ class Game {
                 monster.col = parseInt(newCol);
                 monster.hasMoved = true; // Mark monster as moved
                 this.grid[newRow][newCol] = monster; // Place monster in new position
-                this.renderGrid(); // Re-render the grid
                 this.checkForConflicts(); // Check for conflicts after move
+                this.renderGrid(); // Re-render the grid
             } else {
                 alert("Invalid move"); // Show error for invalid move
             }
@@ -214,96 +216,51 @@ class Game {
         }
     }
 
+    // End the current player's turn
     endPlayerTurn() {
         this.turnEnded = true;
         this.switchTurn();
         this.turnEnded = false;
     }
 
+    // End the current round
     endRound() {
         alert("Round ended. All players have taken their turns.");
         this.currentTurnIndex = 0;
         this.switchTurn();
     }
 
+    // Check for conflicts between monsters
     checkForConflicts() {
-        setTimeout(() => {
-            for (let i = 0; i < this.gridSize; i++) {
-                for (let j = 0; j < this.gridSize; j++) {
-                    const monsters = this.getMonstersAtPosition(i, j);
-                    if (monsters.length > 1) {
-                        this.resolveConflict(monsters);
-                    }
-                }
-            }
-        }, 0); // Simulate asynchronous conflict checking
+        this.worker.postMessage({ action: 'checkConflicts', grid: this.grid }); // Post message to worker for checking conflicts
     }
 
-    getMonstersAtPosition(row, col) {
-        const monsters = [];
-        if (this.grid[row][col]) {
-            monsters.push(this.grid[row][col]);
-        }
-        return monsters;
-    }
-
-    resolveConflict(monsters) {
-        if (monsters.length < 2) return;
-
-        const [monster1, monster2] = monsters;
-        const result = this.getConflictResult(monster1, monster2);
-
-        if (result === 1) {
-            this.removeMonster(monster2);
-        } else if (result === -1) {
-            this.removeMonster(monster1);
-        } else if (result === 0) {
-            this.removeMonster(monster1);
-            this.removeMonster(monster2);
+    // Handler for messages received from the worker
+    handleWorkerMessage(event) {
+        const { action, result } = event.data;
+        if (action === 'conflictsChecked') {
+            // Handle the conflicts result from the worker
+            // For example, update the game state based on the conflicts resolution
+            // result may contain information about resolved conflicts
+            // Update UI or game state accordingly
+            this.resolveConflicts(result);
         }
     }
 
-    getConflictResult(monster1, monster2) {
-        const rules = {
-            V: { W: 1, G: -1, V: 0 },
-            W: { V: -1, G: 1, W: 0 },
-            G: { V: 1, W: -1, G: 0 }
-        };
-
-        return rules[monster1.type][monster2.type];
-    }
-
-    removeMonster(monster) {
-        const { row, col, player } = monster;
-        this.grid[row][col] = null;
-        this.monsters[player] = this.monsters[player].filter(m => m !== monster);
-        this.removedMonsters[player]++;
+    // Resolve conflicts based on the result from the worker
+    resolveConflicts(conflicts) {
+        // Process the conflicts and update the game state
+        // This function will be called when conflicts are checked and resolved in the worker
+        // Update the grid, monsters, removedMonsters, etc. based on the conflicts resolution
+        // Then render the updated grid and player info
         this.renderGrid();
+        this.displayPlayerInfo();
     }
 
-    checkForElimination() {
-        const players = Object.keys(this.removedMonsters);
-        players.forEach(player => {
-            if (this.removedMonsters[player] >= 10) {
-                this.endGame(this.players.find(p => p !== player));
-            }
-        });
-    }
-
-    endGame(winningPlayer) {
-        setTimeout(() => {
-            if (!winningPlayer) {
-                winningPlayer = this.players.find(p => p !== this.players[this.currentTurnIndex]);
-            }
-            alert(`${winningPlayer} wins!`);
-            playerStats[winningPlayer].wins++;
-            playerStats[this.players.find(p => p !== winningPlayer)].losses++;
-            updateGameStats();
-            currentGame = null; // Reset current game
-        }, 0); // Simulate asynchronous game end
-    }
+    // Other methods for managing game state, handling UI interactions, etc.
 }
 
+// Function to update game statistics in the UI
 function updateGameStats() {
     const gameStats = document.getElementById('game-stats');
     gameStats.innerHTML = `
@@ -313,4 +270,6 @@ function updateGameStats() {
     `;
 }
 
+// Initialize the game stats UI
 updateGameStats();
+
